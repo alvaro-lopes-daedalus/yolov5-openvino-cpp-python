@@ -48,12 +48,18 @@ Resize resize_and_pad(cv::Mat& img, cv::Size new_shape) {
 }
 
 
-int main(){
+int main(int argc, char **argv){
+
+    if (argc == 1)
+    {
+        cout << "Usage ./main {model_path}" << endl;
+        return 1;
+    }
 
     // Step 1. Initialize OpenVINO Runtime core
     ov::Core core;
     // Step 2. Read a model
-    std::shared_ptr<ov::Model> model = core.read_model("../../model/yolov5n.xml");
+    std::shared_ptr<ov::Model> model = core.read_model(argv[1]);
 
 
     // Step 3. Read input image
