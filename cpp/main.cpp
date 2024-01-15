@@ -1,6 +1,9 @@
 #include <opencv2/dnn.hpp>
 #include <openvino/openvino.hpp>
 #include <opencv2/opencv.hpp>
+#include <chrono>
+#include <numeric>
+
 
 
 using namespace std;
@@ -82,7 +85,24 @@ int main(){
     // Step 6. Create an infer request for model inference 
     ov::InferRequest infer_request = compiled_model.create_infer_request();
     infer_request.set_input_tensor(input_tensor);
-    infer_request.infer();
+    // infer_request.infer();
+
+    std::vector<double> time_measures;
+    const int N_MEASURES = 100;
+    for (int i=0; i < N_MEASURES; i++) 
+    {
+        auto start = std::chrono::steady_clock::now();
+        infer_request.infer();
+        auto end = std::chrono::steady_clock::now();
+
+        double spent = (double) std::chrono::duration_cast<std::chrono::milliseconds> (end-start).count();
+        time_measures.push_back(spent);
+
+        std::cout << "[INFO] Time spent: " << spent << " [ms]" << std::endl;
+    }
+
+    double mean = std::accumulate(time_measures.begin(), time_measures.end(), 0.0) / time_measures.size();
+    std::cout << "[INFO] Time spent (mean): " << mean << " [ms]" << std::endl;
 
 
     //Step 7. Retrieve inference results 
